@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-var errorhandler = require('errorhandler');
 const line = require('@line/bot-sdk');
 const PORT = process.env.PORT || 3000;
 
@@ -11,12 +10,6 @@ const config = {
 };
 
 const app = express();
-
-app.use(function (req, res, next) {
-	var error = new Error('Cannot ' + req.method + ' ' + req.path);
-	error.status = 404;
-	next(error);
-});
 
 app.post('/webhook', line.middleware(config), (req, res) => {
 	console.log(req.body.events);
