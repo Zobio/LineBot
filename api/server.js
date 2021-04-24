@@ -14,6 +14,13 @@ const app = express();
 app.post('/webhook', line.middleware(config), (req, res) => {
 	console.log(req.body.events);
 
+	//ここのif分はdeveloper consoleの"接続確認"用なので削除して問題ないです。
+	if (req.body.events[0].replyToken === '00000000000000000000000000000000' && req.body.events[1].replyToken === 'ffffffffffffffffffffffffffffffff') {
+		res.send('Hello LINE BOT!(POST)');
+		console.log('疎通確認用');
+		return;
+	}
+
 	Promise
 		.all(req.body.events.map(handleEvent))
 		.then((result) => res.json(result));
@@ -26,7 +33,9 @@ async function handleEvent(event) {
 		return Promise.resolve(null);
 	}
 
-	var nameFunc = require('./fix_name.js');
+	var path = 'C:/Users/soshi/Desktop/LineBot';
+
+	var nameFunc = require(path + '/api/fix_name.js');
 	var receivedText = nameFunc.fix_name(event.message.text);
 
 	var url = 'https://zobio.github.io/image/pokemon-card/regulation_e/';
@@ -35,8 +44,7 @@ async function handleEvent(event) {
 	console.log(url);
 	console.log('https://zobio.github.io/image/pokemon-card/regulation_e/' + receivedText + '/1.txt')
 	const fs = require('fs');
-	var text = fs.readFileSync(encodeURI('./image/pokemon-card/regulation_e/') + receivedText + '/1.txt', 'utf8');
-	//cmdでLinebot下で実行しないといけない(ファイル位置からのパスに変更できたらする)
+	var text = fs.readFileSync(encodeURI(path + '/image/pokemon-card/regulation_e/') + receivedText + '/1.txt', 'utf8');
 	//ファイルが見つからなかった時の処理を追記する
 	var lines = text.toString().split('¥n');
 	var rep = '';
@@ -55,5 +63,5 @@ async function handleEvent(event) {
 	]);
 }
 
-app.listen(PORT);
+(process.env.NOW_REGION) ? module.exports = app : app.listen(PORT);
 console.log(`Server running at ${PORT}`);
