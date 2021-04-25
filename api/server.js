@@ -13,7 +13,6 @@ const config = {
 
 const app = express();
 
-app.get('/', (req, res) => res.send('Hello LINE BOT!(GET)')); //ブラウザ確認用(無くても問題ない)
 app.post('/webhook', line.middleware(config), (req, res) => {
 	console.log(req.body.events);
 
@@ -36,10 +35,34 @@ async function handleEvent(event) {
 		return Promise.resolve(null);
 	}
 
-	return client.replyMessage(event.replyToken, {
+	var path = 'C:/Users/soshi/Desktop/LineBot';
+
+	var nameFunc = require(path + '/api/fix_name.js');
+	var receivedText = nameFunc.fix_name(event.message.text);
+
+	var url = 'https://zobio.github.io/image/pokemon-card/regulation_e/';
+	url += receivedText;
+	url += '/1.jpg';
+	console.log(url);
+	console.log('https://zobio.github.io/image/pokemon-card/regulation_e/' + receivedText + '/1.txt')
+	const fs = require('fs');
+	var text = fs.readFileSync(encodeURI(path + '/image/pokemon-card/regulation_e/') + receivedText + '/1.txt', 'utf8');
+	//ファイルが見つからなかった時の処理を追記する
+	var lines = text.toString().split('¥n');
+	var rep = '';
+	for (var ln of lines) {
+		rep += ln;
+	}
+
+	return client.replyMessage(event.replyToken, [{
+		type: 'image',
+		originalContentUrl: encodeURI(url), //ローカルでできる？できるなら変更
+		previewImageUrl: encodeURI(url)
+	}, {
 		type: 'text',
-		text: event.message.text //実際に返信の言葉を入れる箇所
-	});
+		text: rep
+	}
+	]);
 }
 
 (process.env.NOW_REGION) ? module.exports = app : app.listen(PORT);
