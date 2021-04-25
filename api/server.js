@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-var request = require('request');
+var request = require('sync-request');
 const line = require('@line/bot-sdk');
 const PORT = process.env.PORT || 3000;
 
@@ -37,14 +37,11 @@ async function handleEvent(event) {
 	url += '/1.jpg';
 	console.log(url);
 	console.log('https://zobio.github.io/image/pokemon-card/regulation_e/' + receivedText + '/1.txt')
-	var response = '';
+	var rep = ''
 	try{
-		request('https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/1.txt', function (error, response, body) {
-			response = body;
-		});
-		console.log(response);
+		var response = request('GET', 'https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/1.txt');
+		rep = response.getBody().toString();
 	}catch(error){
-		console.log(error);
 		return client.replyMessage(event.replyToken, {
 		type: 'text',
 		text: '指定された名前のカードが見つかりませんでした。'
@@ -53,11 +50,11 @@ async function handleEvent(event) {
 
 	return client.replyMessage(event.replyToken, [{
 		type: 'image',
-		originalContentUrl: encodeURI(url), //ローカルでできる？できるなら変更
+		originalContentUrl: encodeURI(url),
 		previewImageUrl: encodeURI(url)
 	}, {
 		type: 'text',
-		text: response
+		text: rep
 	}, {
 		type: 'text',
 		text: receivedText + 'の相場: ' + 'https://www.mercari.com/jp/search/?sort_order=price_asc&keyword=' + decodeURI(receivedText) + '&category_root=1328&category_child=82&category_grand_child%5B1289%5D=1&brand_name=&brand_id=&size_group=&price_min=&price_max='

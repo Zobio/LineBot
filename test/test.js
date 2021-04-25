@@ -1,9 +1,5 @@
-var request = require('request');
+var request = require('sync-request');
 
-var response = '';
+var response = request('GET', 'https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI('ダクマ') + '/1.txt');
 
-request('https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI('ダクマ') + '1.txt', function (error, response, body) {
-	response = body;
-});
-
-console.log(response);
+console.log(response.getBody().toString());
