@@ -29,6 +29,12 @@ app.post('/webhook', line.middleware(config), (req, res) => {
 const client = new line.Client(config);
 
 async function handleEvent(event) {
+	if(true) {
+		return client.replyMessage(event.replyToken, {
+			type: 'text',
+			text: 'TEST'
+		});
+	}
 	if (event.type !== 'message' || event.message.type !== 'text') {
 		return Promise.resolve(null);
 	}
