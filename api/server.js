@@ -1,5 +1,6 @@
 'use strict';
 
+console.log('test');
 const express = require('express');
 const line = require('@line/bot-sdk');
 const PORT = process.env.PORT || 3000;
