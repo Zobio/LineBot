@@ -1,7 +1,5 @@
 'use strict';
 
-console.log('TEST');
-
 const express = require('express');
 const line = require('@line/bot-sdk');
 const PORT = process.env.PORT || 3000;
@@ -61,6 +59,9 @@ async function handleEvent(event) {
 	}, {
 		type: 'text',
 		text: rep
+	}, {
+		type: 'text',
+		text: receivedText + 'の相場: ' + 'https://www.mercari.com/jp/search/?sort_order=price_asc&keyword=' + decodeURI(receivedText) + '&category_root=1328&category_child=82&category_grand_child%5B1289%5D=1&brand_name=&brand_id=&size_group=&price_min=&price_max='
 	}
 	]);
 }
