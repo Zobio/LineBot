@@ -43,13 +43,19 @@ async function handleEvent(event) {
 	url += '/1.jpg';
 	console.log(url);
 	console.log('https://zobio.github.io/image/pokemon-card/regulation_e/' + receivedText + '/1.txt')
-	const fs = require('fs');
-	var text = fs.readFileSync(encodeURI(path + '/image/pokemon-card/regulation_e/') + receivedText + '/1.txt', 'utf8');
-	//ファイルが見つからなかった時の処理を追記する
-	var lines = text.toString().split('¥n');
-	var rep = '';
-	for (var ln of lines) {
-		rep += ln;
+	try{
+		const fs = require('fs');
+		var text = fs.readFileSync(encodeURI(path + '/image/pokemon-card/regulation_e/') + receivedText + '/1.txt', 'utf8');
+		var lines = text.toString().split('¥n');
+		var rep = '';
+		for (var ln of lines) {
+			rep += ln;
+		}
+	}catch(error){
+		return client.replyMessage(event.replyToken, {
+		type: 'text',
+		text: '指定された名前のカードが見つかりませんでした。'
+	});
 	}
 
 	return client.replyMessage(event.replyToken, [{
