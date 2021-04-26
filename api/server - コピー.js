@@ -25,49 +25,20 @@ app.post('/webhook', line.middleware(config), (req, res) => {
 
 	Promise
 		.all(req.body.events.map(handleEvent))
-		.then()
+		.then((result) => res.json(result));
 });
 
 const client = new line.Client(config);
 
 async function handleEvent(event) {
-	console.log('handleEvent起動');
 	if (event.type !== 'message' || event.message.type !== 'text') {
 		return Promise.resolve(null);
 	}
 
-	var receivedText = event.message.text;
-
-	var url = 'https://zobio.github.io/image/pokemon-card/regulation_e/';
-	url += receivedText;
-	url += '/1.jpg';
-	console.log(url);
-	console.log('https://zobio.github.io/image/pokemon-card/regulation_e/' + receivedText + '/1.txt')
-	var rep = ''
-	try{
-		var response = request('GET', 'https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/1.txt');
-		rep = response.getBody().toString();
-		console.log('text: ' + rep);
-	}catch(error){
-		return client.replyMessage(event.replyToken, {
+	return client.replyMessage(event.replyToken, {
 		type: 'text',
-		text: '指定された名前のカードが見つかりませんでした。'
+		text: event.message.text //実際に返信の言葉を入れる箇所
 	});
-	}
-
-	console.log('replyMessageの直前まで到達');
-	return client.replyMessage(event.replyToken, [{
-		type: 'image',
-		originalContentUrl: encodeURI(url),
-		previewImageUrl: encodeURI(url)
-	}, {
-		type: 'text',
-		text: rep
-	}, {
-		type: 'text',
-		text: receivedText + 'の相場: ' + 'https://www.mercari.com/jp/search/?sort_order=price_asc&keyword=' + decodeURI(receivedText) + '&category_root=1328&category_child=82&category_grand_child%5B1289%5D=1&brand_name=&brand_id=&size_group=&price_min=&price_max='
-	}
-	]);
 }
 
 (process.env.NOW_REGION) ? module.exports = app : app.listen(PORT);
