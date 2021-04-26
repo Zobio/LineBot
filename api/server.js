@@ -2,7 +2,11 @@
 
 const express = require('express');
 var request = require('sync-request');
+var https = require('https');
+var urlList = [];
 const line = require('@line/bot-sdk');
+const { WSAEHOSTUNREACH } = require('constants');
+const { createCipher } = require('crypto');
 const PORT = process.env.PORT || 3000;
 
 const config = {
@@ -31,43 +35,95 @@ app.post('/webhook', line.middleware(config), (req, res) => {
 const client = new line.Client(config);
 
 async function handleEvent(event) {
-	console.log('handleEvent起動');
 	if (event.type !== 'message' || event.message.type !== 'text') {
 		return Promise.resolve(null);
 	}
 
 	var receivedText = event.message.text;
 
-	var url = 'https://zobio.github.io/image/pokemon-card/regulation_e/';
-	url += receivedText;
-	url += '/1.jpg';
-	console.log(url);
-	console.log('https://zobio.github.io/image/pokemon-card/regulation_e/' + receivedText + '/1.txt')
-	var rep = ''
-	try{
-		var response = request('GET', 'https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/1.txt');
-		rep = response.getBody().toString();
-		console.log('text: ' + rep);
-	}catch(error){
-		return client.replyMessage(event.replyToken, {
-		type: 'text',
-		text: '指定された名前のカードが見つかりませんでした。'
-	});
-	}
+	urlList = putToUrlList(receivedText);
 
-	console.log('replyMessageの直前まで到達');
-	return client.replyMessage(event.replyToken, [{
-		type: 'image',
-		originalContentUrl: encodeURI(url),
-		previewImageUrl: encodeURI(url)
-	}, {
-		type: 'text',
-		text: rep
-	}, {
-		type: 'text',
-		text: receivedText + 'の相場: ' + 'https://www.mercari.com/jp/search/?sort_order=price_asc&keyword=' + decodeURI(receivedText) + '&category_root=1328&category_child=82&category_grand_child%5B1289%5D=1&brand_name=&brand_id=&size_group=&price_min=&price_max='
-	}
-	]);
+	setTimeout(() => {
+		console.log('MAIN: ' + toString(urlList[0]) + " " + urlList.length);
+	
+		if(urlList.length === 0) {
+			return client.replyMessage(event.replyToken, {
+				type: 'text',
+				text: '指定された名前のカードが見つかりませんでした。 ' + toString(urlList.length)
+			});
+		}
+	
+		//urlListの要素数ごとに場合分けして書くと数が膨大になるので、これもforかなんかでうまくまとめられるように
+		if(urlList.length === 1) {
+			return client.replyMessage(event.replyToken, [{
+				type: 'image',
+				originalContentUrl: urlList[0] + '.jpg',
+				previewImageUrl: urlList[0] + '.jpg'
+			}, {
+				type: 'text',
+				text: request('GET', urlList[0] + '.txt').getBody().toString()
+			}, {
+				type: 'text',
+				text: receivedText + 'の相場: ' + 'https://www.mercari.com/jp/search/?sort_order=price_asc&keyword=' + decodeURI(receivedText) + '&category_root=1328&category_child=82&category_grand_child%5B1289%5D=1&brand_name=&brand_id=&size_group=&price_min=&price_max='
+			}
+			]);
+		}
+		return client.replyMessage(event.replyToken, {
+			type: 'text',
+			text: '該当なし'
+		});
+
+	}, 200);
+}
+
+function putToUrlList(receivedText) {
+	//ぐちゃぐちゃだからforで回す
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_c/' + encodeURI(receivedText) + '/1.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_c/' + encodeURI(receivedText) + '/1');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_c/' + encodeURI(receivedText) + '/2.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_c/' + encodeURI(receivedText) + '/2');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_c/' + encodeURI(receivedText) + '/3.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_c/' + encodeURI(receivedText) + '/3');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_d/' + encodeURI(receivedText) + '/1.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_d/' + encodeURI(receivedText) + '/1');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_d/' + encodeURI(receivedText) + '/2.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_d/' + encodeURI(receivedText) + '/2');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_d/' + encodeURI(receivedText) + '/3.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_d/' + encodeURI(receivedText) + '/3');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/1.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/1');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/2.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/2');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+	https.get('https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/3.jpg', function (res) {
+		if (res.statusCode === 200)
+			urlList.push('https://zobio.github.io/image/pokemon-card/regulation_e/' + encodeURI(receivedText) + '/3');
+		console.log(res.statusCode + " " + urlList.length);
+	});
+		return urlList;
 }
 
 (process.env.NOW_REGION) ? module.exports = app : app.listen(PORT);
