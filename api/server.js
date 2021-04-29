@@ -44,7 +44,10 @@ async function handleEvent(event) {
 	urlList = putToUrlList(receivedText);
 
 	setTimeout(() => {
-		console.log('MAIN: ' + urlList[0] + " " + urlList.length);
+		console.log('URL');
+		for(let i = 0; i < urlList.length; i++) {
+			console.log(urlList[i]);
+		}
 
 		var reply = [];
 		for(let i = 0; i < urlList.length; i++) {
@@ -57,6 +60,9 @@ async function handleEvent(event) {
 				type: 'text',
 				text: request('GET', urlList[i] + '.txt').getBody().toString()
 			})
+		}
+
+		if(reply.length) {
 			reply.push({
 				type: 'text',
 				text: receivedText + 'の相場: ' + 'https://www.mercari.com/jp/search/?sort_order=price_asc&keyword=' + decodeURI(receivedText) + '&category_root=1328&category_child=82&category_grand_child%5B1289%5D=1&brand_name=&brand_id=&size_group=&price_min=&price_max='
